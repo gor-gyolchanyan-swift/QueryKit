@@ -7,33 +7,31 @@
     import func ObjectiveC.objc_getClass
 #endif
 
+@frozen
 public struct QueryForClassForName {
 
-    // MARK: Type: QueryForClassForName
-
+    @inlinable
     public init(className: String) {
         self.className = className
     }
 
-    private let className: String
+    @usableFromInline
+    internal let className: String
 }
 
-extension QueryForClassForName: Query {
-
-    // MARK: Type: Query
+extension QueryForClassForName: SimpleQueryProtocol {
 
     public typealias QuerySuccess = AnyClass
 
     public enum QueryFailure: Error {
-
-        // MARK: Type: QueryForClassForName.QueryFailure
 
         case notSupported
 
         case noClassForName(className: String)
     }
 
-    public mutating func executeQuery() -> QueryResult {
+    @inlinable
+    public func executeQuery() -> QueryResult {
         #if canImport(ObjectiveC)
             let maybeClass = className.withCString { className in
                 ObjectiveC.objc_getClass(className)

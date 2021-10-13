@@ -11,24 +11,24 @@
 
 import class Foundation.Bundle
 
+@frozen
 public struct QueryForImageInBundleForName<BundleQuery>
-where BundleQuery: Query, BundleQuery.QuerySuccess == Foundation.Bundle {
+where BundleQuery: QueryProtocol, BundleQuery.QuerySuccess == Foundation.Bundle {
 
-    // MARK: Type: QueryForImageInBundleForName
-
+    @inlinable
     public init(bundleQuery: BundleQuery, imageName: String) {
         self.bundleQuery = bundleQuery
         self.imageName = imageName
     }
 
-    private var bundleQuery: BundleQuery
+    @usableFromInline
+    internal let bundleQuery: BundleQuery
 
-    private let imageName: String
+    @usableFromInline
+    internal let imageName: String
 }
 
-extension QueryForImageInBundleForName: Query {
-
-    // MARK: Type: Query
+extension QueryForImageInBundleForName {
 
     #if os(macOS)
         public typealias QuerySuccess = AppKit.NSImage
@@ -38,15 +38,14 @@ extension QueryForImageInBundleForName: Query {
 
     public enum QueryFailure: Error {
 
-        // MARK: Type: QueryForImageInBundleForName.QueryFailure
-
         case bundleQueryFailure(bundleQuery: BundleQuery, bundleQueryFailure: BundleQuery.QueryFailure)
 
         case noImageInBundleForName(bundle: Foundation.Bundle, imageName: String)
     }
 
-    public mutating func executeQuery() -> QueryResult {
-        switch bundleQuery.executeQuery() {
+    @inlinable
+    internal func executeQuery(_ bundleQueryResult: BundleQuery.QueryResult) -> QueryResult {
+        switch bundleQueryResult {
             case .success(let bundle):
                 #if os(macOS)
                     guard let image = bundle.image(forResource: imageName) else {
@@ -62,5 +61,24 @@ extension QueryForImageInBundleForName: Query {
             case .failure(let bundleQueryFailure):
                 return .failure(.bundleQueryFailure(bundleQuery: bundleQuery, bundleQueryFailure: bundleQueryFailure))
         }
+    }
+}
+
+extension QueryForImageInBundleForName: QueryProtocol {
+
+    @inlinable
+    public func executeQuery(resultHandler: @escaping QueryResultHandler) {
+        bundleQuery.executeQuery { bundleQueryResult in
+            return resultHandler(executeQuery(bundleQueryResult))
+        }
+    }
+}
+
+extension QueryForImageInBundleForName: SimpleQueryProtocol
+where BundleQuery: SimpleQueryProtocol {
+
+    @inlinable
+    public func executeQuery() -> QueryResult {
+        return executeQuery(bundleQuery.executeQuery())
     }
 }

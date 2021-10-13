@@ -11,20 +11,19 @@
 
 import class Foundation.Bundle
 
+@frozen
 public struct QueryForImageInBundleAtPath {
 
-    // MARK: Type: QueryForImageInBundleAtPath
-
+    @inlinable
     public init(imagePath: String) {
         self.imagePath = imagePath
     }
 
-    private let imagePath: String
+    @usableFromInline
+    internal let imagePath: String
 }
 
-extension QueryForImageInBundleAtPath: Query {
-
-    // MARK: Type: Query
+extension QueryForImageInBundleAtPath: SimpleQueryProtocol {
 
     #if os(macOS)
         public typealias QuerySuccess = AppKit.NSImage
@@ -34,12 +33,11 @@ extension QueryForImageInBundleAtPath: Query {
 
     public enum QueryFailure: Error {
 
-        // MARK: Type: QueryForImageInBundleForName.QueryFailure
-
         case noImageAtPath(imagePath: String)
     }
 
-    public mutating func executeQuery() -> QueryResult {
+    @inlinable
+    public func executeQuery() -> QueryResult {
         #if os(macOS)
             guard let image = AppKit.NSImage(contentsOfFile: imagePath) else {
                 return .failure(.noImageAtPath(imagePath: imagePath))

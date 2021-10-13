@@ -11,44 +11,28 @@
 
 import class Foundation.Bundle
 
+@frozen
 public struct QueryForColorInBundleForName<BundleQuery>
-where BundleQuery: Query, BundleQuery.QuerySuccess == Foundation.Bundle {
+where BundleQuery: QueryProtocol, BundleQuery.QuerySuccess == Foundation.Bundle {
 
-    // MARK: Type: QueryForColorInBundleForName
-
+    @inlinable
     public init(bundleQuery: BundleQuery, colorName: String) {
         self.bundleQuery = bundleQuery
         self.colorName = colorName
     }
 
-    private var bundleQuery: BundleQuery
+    @usableFromInline
+    internal let bundleQuery: BundleQuery
 
-    private let colorName: String
+    @usableFromInline
+    internal let colorName: String
 }
 
-extension QueryForColorInBundleForName: Query {
+extension QueryForColorInBundleForName {
 
-    // MARK: Type: Query
-
-    #if os(macOS)
-        public typealias QuerySuccess = AppKit.NSColor
-    #elseif os(iOS) || os(tvOS) || os(watchOS)
-        public typealias QuerySuccess = UIKit.UIColor
-    #endif
-
-    public enum QueryFailure: Error {
-
-        // MARK: Type: QueryForColorInBundleForName.QueryFailure
-
-        case notSupported
-
-        case bundleQueryFailure(bundleQuery: BundleQuery, bundleQueryFailure: BundleQuery.QueryFailure)
-
-        case noColorInBundleForName(bundle: Foundation.Bundle, colorName: String)
-    }
-
-    public mutating func executeQuery() -> QueryResult {
-        switch bundleQuery.executeQuery() {
+    @inlinable
+    internal func executeQuery(_ bundleQueryResult: BundleQuery.QueryResult) -> QueryResult {
+         switch bundleQueryResult {
             case .success(let bundle):
                 #if os(macOS)
                     if #available(macOS 10.13, *) {
@@ -72,5 +56,39 @@ extension QueryForColorInBundleForName: Query {
             case .failure(let bundleQueryFailure):
                 return .failure(.bundleQueryFailure(bundleQuery: bundleQuery, bundleQueryFailure: bundleQueryFailure))
         }
+    }
+}
+
+extension QueryForColorInBundleForName: QueryProtocol {
+
+    #if os(macOS)
+        public typealias QuerySuccess = AppKit.NSColor
+    #elseif os(iOS) || os(tvOS) || os(watchOS)
+        public typealias QuerySuccess = UIKit.UIColor
+    #endif
+
+    public enum QueryFailure: Error {
+
+        case notSupported
+
+        case bundleQueryFailure(bundleQuery: BundleQuery, bundleQueryFailure: BundleQuery.QueryFailure)
+
+        case noColorInBundleForName(bundle: Foundation.Bundle, colorName: String)
+    }
+
+    @inlinable
+    public func executeQuery(resultHandler: @escaping QueryResultHandler) {
+        bundleQuery.executeQuery { bundleQueryResult in
+            return resultHandler(executeQuery(bundleQueryResult))
+        }
+    }
+}
+
+extension QueryForColorInBundleForName: SimpleQueryProtocol
+where BundleQuery: SimpleQueryProtocol {
+
+    @inlinable
+    public func executeQuery() -> QueryResult {
+        return executeQuery(bundleQuery.executeQuery())
     }
 }

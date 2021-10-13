@@ -3,19 +3,16 @@
 // Licensing information can be found in the `LICENSE` file located at the root of the repository that contains this file.
 //
 
-extension Optional: Query {
-
-    // MARK: Type: Query
+extension Optional: SimpleQueryProtocol {
 
     public typealias QuerySuccess = Wrapped
 
     public enum QueryFailure: Error {
 
-        // MARK: Type: Optional.QueryFailure
-
         case isNil
     }
 
+    @inlinable
     public func executeQuery() -> QueryResult {
         map(QueryResult.success(_:)) ?? .failure(.isNil)
     }

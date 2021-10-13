@@ -3,15 +3,14 @@
 // Licensing information can be found in the `LICENSE` file located at the root of the repository that contains this file.
 //
 
-public protocol Query {
+extension Never: SimpleQueryProtocol {
 
-    // MARK: Type: Query
+    public typealias QuerySuccess = Never
 
-    associatedtype QuerySuccess
+    public typealias QueryFailure = Never
 
-    associatedtype QueryFailure: Error
-
-    typealias QueryResult = Result<QuerySuccess, QueryFailure>
-
-    mutating func executeQuery() -> QueryResult
+    @inlinable
+    public func executeQuery() -> QueryResult {
+        switch self { }
+    }
 }

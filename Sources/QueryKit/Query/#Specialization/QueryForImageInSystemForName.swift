@@ -11,20 +11,19 @@
 
 import class Foundation.Bundle
 
+@frozen
 public struct QueryForImageInSystemForName {
 
-    // MARK: Type: QueryForImageInSystemForName
-
+    @inlinable
     public init(imageName: String) {
         self.imageName = imageName
     }
 
-    private let imageName: String
+    @usableFromInline
+    internal let imageName: String
 }
 
-extension QueryForImageInSystemForName: Query {
-
-    // MARK: Type: Query
+extension QueryForImageInSystemForName: SimpleQueryProtocol {
 
     #if os(macOS)
         public typealias QuerySuccess = AppKit.NSImage
@@ -34,14 +33,13 @@ extension QueryForImageInSystemForName: Query {
 
     public enum QueryFailure: Error {
 
-        // MARK: Type: QueryForImageInSystemForName.QueryFailure
-
         case notSupported
 
         case noImageInSystemForName(imageName: String)
     }
 
-    public mutating func executeQuery() -> QueryResult {
+    @inlinable
+    public func executeQuery() -> QueryResult {
         #if os(macOS)
             if #available(macOS 11.0, *) {
                 guard let image = AppKit.NSImage(systemSymbolName: imageName, accessibilityDescription: nil) else {

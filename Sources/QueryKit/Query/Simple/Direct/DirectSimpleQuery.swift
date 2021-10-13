@@ -3,43 +3,43 @@
 // Licensing information can be found in the `LICENSE` file located at the root of the repository that contains this file.
 //
 
-public struct DirectQuery<QuerySuccess, QueryFailure>
+@frozen
+public struct DirectSimpleQuery<QuerySuccess, QueryFailure>
 where QueryFailure: Error {
 
-    // MARK: Type: DirectQuery
-
+    @inlinable
     public init(_ queryRoutine: @escaping () -> QueryResult) {
         self.queryRoutine = queryRoutine
     }
 
-    private let queryRoutine: () -> QueryResult
+    @usableFromInline
+    internal let queryRoutine: () -> QueryResult
 }
 
-extension DirectQuery {
+extension DirectSimpleQuery {
 
-    // MARK: Type: DirectQuery
-
+    @inlinable
     public init(_ queryRoutine: @escaping () throws -> QuerySuccess)
     where QueryFailure == Error {
         self.init {
-            return QueryResult(catching: queryRoutine)
+            QueryResult(catching: queryRoutine)
         }
     }
 
+    @inlinable
     public init(_ queryRoutine: @escaping () -> QuerySuccess)
     where QueryFailure == Never {
         self.init {
-            return QueryResult.success(queryRoutine())
+            QueryResult.success(queryRoutine())
         }
     }
 }
 
-extension DirectQuery: Query {
-
-    // MARK: Type: Query
+extension DirectSimpleQuery: SimpleQueryProtocol {
 
     public typealias QueryResult = Result<QuerySuccess, QueryFailure>
 
+    @inlinable
     public func executeQuery() -> QueryResult {
         queryRoutine()
     }
