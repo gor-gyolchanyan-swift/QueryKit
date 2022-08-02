@@ -64,7 +64,7 @@
 
             case bundleQueryFailure(bundleQuery: BundleQuery, bundleQueryFailure: BundleQuery.Failure)
 
-            case noColorInBundleForName(bundle: Bundle, name: String)
+            case noColorInBundleForName(bundle: Foundation.Bundle, name: String)
         }
 
         @inlinable

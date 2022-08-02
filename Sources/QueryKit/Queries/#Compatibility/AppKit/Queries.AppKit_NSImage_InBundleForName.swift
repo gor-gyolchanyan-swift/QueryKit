@@ -64,7 +64,7 @@
 
             case bundleQueryFailure(bundleQuery: BundleQuery, bundleQueryFailure: BundleQuery.Failure)
 
-            case noImageInBundleForName(bundle: Bundle, name: String)
+            case noImageInBundleForName(bundle: Foundation.Bundle, name: String)
         }
 
         @inlinable
