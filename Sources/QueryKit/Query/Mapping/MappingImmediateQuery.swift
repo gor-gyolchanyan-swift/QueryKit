@@ -4,15 +4,15 @@
 //
 
 @usableFromInline
-internal struct MappingQuery<Other, Success, Failure>
-where Other: Query, Failure: Error {
+internal struct MappingImmediateQuery<Other, Success, Failure>
+where Other: ImmediateQuery, Failure: Error {
 
     // MARK: MappingQuery
 
     @inlinable
     internal init(
         other: Other,
-        doMap: @escaping (Result<Other.Success, Other.Failure>) async -> Result<Success, Failure>
+        doMap: @escaping (Result<Other.Success, Other.Failure>) -> Result<Success, Failure>
     ) {
         self.other = other
         self.doMap = doMap
@@ -22,15 +22,15 @@ where Other: Query, Failure: Error {
     internal let other: Other
 
     @usableFromInline
-    internal let doMap: (Result<Other.Success, Other.Failure>) async -> Result<Success, Failure>
+    internal let doMap: (Result<Other.Success, Other.Failure>) -> Result<Success, Failure>
 }
 
-extension MappingQuery: Query {
+extension MappingImmediateQuery: ImmediateQuery {
 
     // MARK: Query
 
     @inlinable
-    internal func execute() async -> Result<Success, Failure> {
-        await doMap(await other.execute())
+    internal func execute() -> Result<Success, Failure> {
+        doMap(other.execute())
     }
 }

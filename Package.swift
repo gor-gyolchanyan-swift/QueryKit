@@ -1,8 +1,8 @@
-// swift-tools-version:5.4
+// swift-tools-version:5.7
 
 //
-// Introductory information can be found in the `README.md` file located at the root of the repository that contains this file.
-// Licensing information can be found in the `LICENSE` file located at the root of the repository that contains this file.
+// Introductory information is in the `README.md` file in the root directory of the repository this file is in.
+// Licensing information is in the `LICENSE.txt` file in the root directory of the repository this file is in.
 //
 
 import PackageDescription
@@ -10,10 +10,10 @@ import PackageDescription
 let package = Package(
     name: "QueryKit",
     platforms: [
-        .macOS(.v10_10),
-        .iOS(.v9),
-        .tvOS(.v9),
-        .watchOS(.v2)
+        .macOS(.v10_15),
+        .iOS(.v13),
+        .tvOS(.v13),
+        .watchOS(.v6)
     ],
     products: [
         .library(
